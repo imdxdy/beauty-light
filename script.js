@@ -60,14 +60,18 @@ colorPicker.addEventListener('input', (e) => {
 // 摄像头控制
 async function initCamera(constraints) {
     try {
-        stream = await navigator.mediaDevices.getUserMedia(constraints);
-        const track = stream.getVideoTracks()[0];
-        const settings = track.getSettings();
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                ...constraints.video,
+                // 添加移动端适配参数
+                width: { ideal: Math.min(640, window.innerWidth) },
+                height: { ideal: Math.min(480, window.innerHeight * 0.6) }
+            }
+        });
         
-        // 自动调整视频元素尺寸
-        video.style.width = `${Math.min(settings.width, window.innerWidth - 40)}px`;
-        video.style.height = 'auto';
-        
+        // 移除手动尺寸设置
+        video.srcObject = stream;
+        video.play();
         return true;
     } catch (err) {
         console.error('摄像头初始化失败:', err);

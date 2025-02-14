@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>美颜补光灯</title>
     <link rel="stylesheet" href="styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
 </head>
 <body>
     <header class="app-header">
@@ -14,7 +16,7 @@
     <main class="main-content">
         <!-- 视频区域 -->
         <div class="video-container">
-            <video id="video" width="640" height="480" autoplay></video>
+            <video id="video" playsinline autoplay></video>
             <div class="primary-controls">
                 <button 
                     id="toggleCamera"
