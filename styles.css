@@ -1,0 +1,504 @@
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: background-color 0.3s;
+    background-color: var(--current-bg, #ffffff);
+    font-family: 'Helvetica Neue', 'PingFang SC', sans-serif;
+    cursor: url('data:image/svg+xml;utf8,<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="10" fill="%23ff7eb9" opacity="0.8"/></svg>'), auto;
+}
+
+.controls {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    z-index: 1;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    border-radius: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+button {
+    background: linear-gradient(135deg, #ff9ac2, #ff7eb9);
+    color: white;
+    padding: 10px 25px;
+    border-radius: 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    box-shadow: 0 4px 15px rgba(255, 126, 185, 0.2);
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 126, 185, 0.3);
+}
+
+#video {
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    border: 2px solid white;
+    max-width: 90%;
+    margin: 0 auto;
+    display: block;
+}
+
+.sliders {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.slider-item {
+    display: grid;
+    grid-template-columns: 80px 1fr 120px;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+.slider-item label {
+    color: #666;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.slider-item input[type="range"] {
+    -webkit-appearance: none;
+    height: 6px;
+    background: linear-gradient(90deg, #ffb3c6, #ffd7e5);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    border-radius: 3px;
+    width: 100%;
+    min-width: 200px;
+}
+
+.slider-item input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    border: 2px solid #ff7eb9;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 2px 4px rgba(255, 126, 185, 0.3);
+}
+
+.slider-item input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    background: #ffe5f0;
+}
+
+.value-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100px;
+}
+
+.value-input {
+    width: 100%;
+    padding: 6px 8px;
+    text-align: center;
+    border: 1px solid #ffd1dc;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.value-input:focus {
+    border-color: #ff7eb9;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 126, 185, 0.3);
+}
+
+.presets {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(80px, 1fr));
+    gap: 8px;
+}
+
+.presets button {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 0.9em;
+    min-width: auto;
+    background-image: linear-gradient(45deg, #ff758c, #ff7eb3);
+    position: relative;
+    overflow: hidden;
+}
+
+.presets button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    transition: 0.5s;
+}
+
+.presets button:hover::after {
+    left: 100%;
+}
+
+.presets button[data-filter="pink"] { background: #ffb6c1; }
+.presets button[data-filter="cold"] { background: #f0f8ff; }
+.presets button[data-filter="orange"] { background: #ffdab9; }
+.presets button[data-filter="vintage"] { background: #d2b48c; }
+
+.color-presets {
+    display: flex;
+    gap: 5px;
+    margin-left: 10px;
+}
+
+.color-presets button {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin: 0 3px;
+    border: 2px solid rgba(255,255,255,0.3);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.color-presets button:hover {
+    transform: scale(1.15);
+    border-color: rgba(255,126,185,0.5);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+
+.color-presets button.active {
+    border: 2px solid #ff7eb9;
+    box-shadow: 0 0 0 2px rgba(255, 126, 185, 0.3);
+}
+
+.glass-effect {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.app-title {
+    background: linear-gradient(45deg, #ff76b5, #ff9d6c);
+    -webkit-background-clip: text;
+    color: transparent;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 0.5em 0;
+}
+
+/* 新增媒体控制样式 */
+.media-controls {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+#capture {
+    background: #4CAF50 !important;
+}
+
+#record {
+    background: #f44336 !important;
+}
+
+#timer {
+    color: #666;
+    font-size: 14px;
+    padding: 5px 10px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 15px;
+}
+
+/* 相册样式 */
+#gallery {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    max-width: 200px;
+    flex-wrap: wrap;
+}
+
+.photo-item {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    border: 3px solid #ffd1dc;
+    box-shadow: 0 4px 12px rgba(255, 182, 193, 0.3);
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.photo-item:hover {
+    transform: translateY(-5px);
+}
+
+/* 新增自动模式样式 */
+#autoMode {
+    background: #FF9800 !important;
+}
+
+.auto-mode-active {
+    box-shadow: 0 0 15px #ffeb3b !important;
+}
+
+/* 新增自定义滤镜样式 */
+.custom-filters {
+    margin-top: 15px;
+    position: relative;
+}
+
+#saveFilter {
+    background: #9c27b0 !important;
+}
+
+.saved-filter {
+    background: linear-gradient(45deg, #ff9a9e, #fad0c4) !important;
+    margin: 5px;
+    position: relative;
+}
+
+.saved-filter::after {
+    content: "×";
+    position: absolute;
+    right: 5px;
+    top: 2px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.saved-filter:hover::after {
+    opacity: 1;
+}
+
+.filter-name-input {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 8px;
+    border-radius: 15px;
+    border: 2px solid #ff7eb9;
+    background: rgba(255,255,255,0.9);
+    z-index: 2;
+}
+
+/* 新增标题样式 */
+.app-header {
+    text-align: center;
+    margin: 40px 0 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.app-subtitle {
+    color: #666;
+    font-size: 1.2em;
+    margin: 10px 0 40px;
+    display: block;
+}
+
+/* 主内容区域 */
+.main-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+
+/* 视频容器 */
+.video-container {
+    text-align: center;
+    margin: 0 0 30px;
+    width: 100%;
+}
+
+/* 主要操作按钮 */
+.primary-controls {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.primary-controls button {
+    font-size: 1.1em;
+    padding: 12px 25px;
+    border-radius: 30px;
+    transition: all 0.3s;
+}
+
+/* 设置面板 */
+.settings-panel {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    margin: 20px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.settings-panel::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    right: -30px;
+    width: 80px;
+    height: 40px;
+    background: #ffd1dc;
+    transform: rotate(45deg);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.setting-group {
+    margin-bottom: 30px;
+}
+
+.group-title {
+    color: #ff7eb9;
+    font-size: 1.3em;
+    margin: 0 0 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #ffe5f0;
+}
+
+/* 背景设置 */
+.background-controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* 新增装饰性动画 */
+@keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+}
+
+.decorative-heart {
+    position: absolute;
+    top: -15px;
+    left: 20px;
+    font-size: 1.8em;
+    animation: float 3s ease-in-out infinite;
+    filter: drop-shadow(0 2px 4px rgba(255, 126, 185, 0.3));
+}
+
+/* 添加移动端优化 */
+@media (max-width: 768px) {
+    .controls {
+        top: 10px;
+        padding: 10px;
+        border-radius: 20px;
+    }
+    
+    button {
+        padding: 8px 15px;
+        font-size: 0.9em;
+    }
+    
+    .slider-item {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
+    .slider-item label {
+        font-size: 13px;
+    }
+    
+    .value-container {
+        justify-content: flex-end;
+    }
+    
+    .video-container {
+        margin-top: 80px;
+    }
+    
+    .slider-item input[type="range"] {
+        height: 8px;
+    }
+    
+    .slider-item input[type="range"]::-webkit-slider-thumb {
+        width: 22px;
+        height: 22px;
+    }
+    
+    .presets {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .presets button {
+        font-size: 0.85em;
+        padding: 6px 8px;
+    }
+}
+
+/* 添加触摸反馈 */
+button:active {
+    transform: scale(0.95);
+    transition: transform 0.1s;
+}
+
+/* 优化粒子性能 */
+@media (prefers-reduced-motion: reduce) {
+    .particle {
+        animation: none !important;
+    }
+}
+
+/* 为原始滤镜添加样式 */
+.presets button[data-filter="original"] {
+    background: linear-gradient(45deg, #e0e0e0, #f5f5f5);
+    color: #666;
+}
+
+/* 移除按钮前的蝴蝶结图标 */
+.presets button::before {
+    content: "" !important;
+    margin-right: 0;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    .color-presets-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .color-presets-grid button {
+        width: 35px;
+        height: 35px;
+    }
+} 

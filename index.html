@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>美颜补光灯</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="app-header">
+        <h1 class="app-title">✨ 美颜补光灯 ✨</h1>
+        <p class="app-subtitle">打造你的完美自拍</p>
+    </header>
+    
+    <main class="main-content">
+        <!-- 视频区域 -->
+        <div class="video-container">
+            <video id="video" width="640" height="480" autoplay></video>
+            <div class="primary-controls">
+                <button 
+                    id="toggleCamera"
+                    aria-label="切换摄像头"
+                    aria-live="polite"
+                >
+                    📷 开启摄像头
+                </button>
+                <button id="capture">📸 拍照</button>
+                <button id="record">⏺ 开始录制</button>
+            </div>
+        </div>
+
+        <!-- 设置面板 -->
+        <div class="settings-panel">
+            <div class="decorative-heart">💖</div>
+            <!-- 背景设置 -->
+            <section class="setting-group">
+                <h3 class="group-title">🎨 背景设置</h3>
+                <div class="background-controls">
+                    <input 
+                        type="color" 
+                        id="colorPicker" 
+                        value="#ffffff"
+                        aria-label="选择背景颜色"
+                        style="width: 100%; height: 40px"
+                    >
+                </div>
+            </section>
+
+            <!-- 滤镜调节 -->
+            <section class="setting-group">
+                <h3 class="group-title">🎛️ 滤镜调节</h3>
+                <div class="sliders">
+                    <div class="slider-item">
+                        <label for="saturation">饱和度</label>
+                        <input type="range" id="saturation" min="0" max="200" value="100">
+                        <div class="value-container">
+                            <input type="number" class="value-input" min="0" max="200" value="100" placeholder="%">
+                        </div>
+                    </div>
+                    <div class="slider-item">
+                        <label for="hue">色相</label>
+                        <input type="range" id="hue" min="-180" max="180" value="0">
+                        <div class="value-container">
+                            <input type="number" class="value-input" min="-180" max="180" value="0" placeholder="°">
+                        </div>
+                    </div>
+                    <div class="slider-item">
+                        <label for="brightness">亮度</label>
+                        <input type="range" id="brightness" min="50" max="150" value="100">
+                        <div class="value-container">
+                            <input type="number" class="value-input" min="50" max="150" value="100" placeholder="%">
+                        </div>
+                    </div>
+                    <div class="slider-item">
+                        <label for="beauty">美颜</label>
+                        <input type="range" id="beauty" min="0" max="100" value="0">
+                        <div class="value-container">
+                            <input type="number" class="value-input" min="0" max="100" value="0" placeholder="%">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 推荐滤镜 -->
+            <section class="setting-group">
+                <h3 class="group-title">💄 推荐滤镜</h3>
+                <div class="presets">
+                    <button data-filter="original">🌿 原始</button>
+                    <button data-filter="pink">🌸 粉嫩</button>
+                    <button data-filter="cold">❄️ 冷白皮</button>
+                    <button data-filter="orange">🍊 元气橙</button>
+                    <button data-filter="vintage">📻 复古</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div id="gallery"></div>
+    <div id="loading" aria-live="polite" class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
