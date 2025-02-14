@@ -43,12 +43,12 @@ button:hover {
 }
 
 #video {
-    width: 100% !important;
-    height: auto !important;
     border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
     border: 2px solid white;
-    background: #000;
-    aspect-ratio: 4/3;
+    max-width: 90%;
+    margin: 0 auto;
+    display: block;
 }
 
 .sliders {
@@ -337,21 +337,19 @@ button:hover {
 
 /* 视频容器 */
 .video-container {
-    position: relative;
-    width: 90%;
-    max-width: 600px;
+    text-align: center;
     margin: 0 auto 30px;
-    background: rgba(255,255,255,0.9);
-    border-radius: 15px;
-    padding: 15px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 640px;
+    padding: 0 20px;
+    box-sizing: border-box;
 }
 
 /* 主要操作按钮 */
 .primary-controls {
     margin-top: 30px;
     display: flex;
-    gap: 15px;
+    gap: 20px;
     justify-content: center;
     flex-wrap: wrap;
 }
@@ -369,9 +367,12 @@ button:hover {
     border-radius: 20px;
     padding: 25px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    margin: 20px 0;
+    margin: 20px auto;
+    width: calc(100% - 40px);
+    max-width: 640px;
     position: relative;
     overflow: hidden;
+    box-sizing: border-box;
 }
 
 .settings-panel::before {
@@ -436,45 +437,33 @@ button:hover {
     }
     
     .slider-item {
-        grid-template-columns: 1fr;
-        gap: 8px;
+        grid-template-columns: 60px 1fr 80px;
+        gap: 10px;
+        align-items: center;
     }
     
     .slider-item label {
-        font-size: 13px;
+        font-size: 14px;
+        white-space: nowrap;
+        text-align: left;
     }
     
     .value-container {
-        justify-content: flex-end;
+        /* 恢复默认对齐 */
+    }
+    
+    .value-input {
+        padding: 4px 6px;
+        font-size: 14px;
+        width: 70px;
     }
     
     .video-container {
-        width: 95%;
-        margin-top: 60px;
-    }
-    
-    #video {
-        border-radius: 8px;
-    }
-    
-    .primary-controls {
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(255,255,255,0.9);
-        padding: 10px;
-        border-radius: 30px;
-        z-index: 2;
+        padding: 0 15px;
     }
     
     .slider-item input[type="range"] {
-        height: 8px;
-    }
-    
-    .slider-item input[type="range"]::-webkit-slider-thumb {
-        width: 22px;
-        height: 22px;
+        min-width: auto;
     }
     
     .presets {
@@ -484,6 +473,37 @@ button:hover {
     .presets button {
         font-size: 0.85em;
         padding: 6px 8px;
+    }
+    
+    .primary-controls {
+        position: static;
+        transform: none;
+        background: transparent;
+        padding: 0;
+        box-shadow: none;
+    }
+    
+    .settings-panel {
+        width: calc(100% - 30px);
+        padding: 15px;
+    }
+    
+    #video {
+        width: 100% !important;
+        max-width: 100vh; /* 竖屏限制最大宽度 */
+        height: auto;
+    }
+    
+    .video-container {
+        margin-top: 20px;
+        padding: 0 10px;
+    }
+}
+
+@media (min-width: 769px) {
+    #video {
+        width: auto !important;
+        max-height: 70vh;
     }
 }
 
@@ -502,8 +522,8 @@ button:active {
 
 /* 为原始滤镜添加样式 */
 .presets button[data-filter="original"] {
-    background: linear-gradient(45deg, #e0e0e0, #f5f5f5);
-    color: #666;
+    background: linear-gradient(45deg, #f5f5f5, #e0e0e0);
+    color: #888;
 }
 
 /* 移除按钮前的蝴蝶结图标 */

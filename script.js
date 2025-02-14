@@ -21,17 +21,17 @@ const DEBOUNCE_DELAY = 100;
 const AUTO_MODE_COOLDOWN = 5000;
 let applyFiltersTimeout;
 
-// 在文件顶部添加分辨率配置
+// 修改分辨率预设
 const RESOLUTION_PRESETS = {
     desktop: [
-        { width: 1920, height: 1080 },
-        { width: 1280, height: 720 },
-        { width: 640, height: 480 }
+        { width: 1920, height: 1080 },  // 16:9 横屏
+        { width: 1280, height: 720 },   // 16:9
+        { width: 640, height: 480 }      // 4:3
     ],
     mobile: [
-        { width: { ideal: 1280 }, height: { ideal: 720 } },
-        { width: { ideal: 720 }, height: { ideal: 1280 } },
-        { width: { exact: 480 }, height: { exact: 640 } }
+        { width: { ideal: 720 }, height: { ideal: 1280 } }, // 9:16 竖屏
+        { width: { ideal: 480 }, height: { ideal: 640 } },    // 3:4
+        { width: { exact: 360 }, height: { exact: 640 } }    // 9:16
     ]
 };
 
@@ -63,15 +63,21 @@ async function initCamera(constraints) {
         stream = await navigator.mediaDevices.getUserMedia({
             video: {
                 ...constraints.video,
-                // 添加移动端适配参数
-                width: { ideal: Math.min(640, window.innerWidth) },
-                height: { ideal: Math.min(480, window.innerHeight * 0.6) }
+                facingMode: 'user'
             }
         });
         
-        // 移除手动尺寸设置
-        video.srcObject = stream;
-        video.play();
+        const track = stream.getVideoTracks()[0];
+        const settings = track.getSettings();
+        
+        // 自动旋转逻辑
+        const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+        video.style.width = isMobile ? 
+            `${Math.min(settings.height, window.innerWidth)}px` : 
+            `${Math.min(settings.width, window.innerWidth - 40)}px`;
+            
+        video.style.height = 'auto';
+        
         return true;
     } catch (err) {
         console.error('摄像头初始化失败:', err);
@@ -79,40 +85,32 @@ async function initCamera(constraints) {
     }
 }
 
-// 修改摄像头切换事件
-toggleBtn.addEventListener('click', async () => {
-    if (!stream) {
-        try {
-            const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-            const resolutions = isMobile ? RESOLUTION_PRESETS.mobile : RESOLUTION_PRESETS.desktop;
-            
-            for (const resolution of resolutions) {
-                const constraints = {
-                    video: {
-                        facingMode: 'user',
-                        ...resolution
-                    }
-                };
-                
-                if (await initCamera(constraints)) {
-                    video.srcObject = stream;
-                    toggleBtn.textContent = '关闭摄像头';
-                    showToast(`🎥 已启用 ${resolution.width}x${resolution.height} 分辨率`);
-                    break;
+// 添加自动初始化逻辑
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+        const resolutions = isMobile ? RESOLUTION_PRESETS.mobile : RESOLUTION_PRESETS.desktop;
+        
+        for (const resolution of resolutions) {
+            const constraints = {
+                video: {
+                    facingMode: 'user',
+                    ...resolution
                 }
-            }
+            };
             
-            if (!stream) {
-                throw new Error('无法找到合适的分辨率');
+            if (await initCamera(constraints)) {
+                video.srcObject = stream;
+                showToast(`🎥 已启用 ${resolution.width}x${resolution.height} 分辨率`);
+                break;
             }
-        } catch (err) {
-            alert('摄像头访问失败: ' + err.message);
         }
-    } else {
-        stream.getTracks().forEach(track => track.stop());
-        stream = null;
-        video.srcObject = null;
-        toggleBtn.textContent = '开启摄像头';
+        
+        if (!stream) {
+            throw new Error('无法找到合适的分辨率');
+        }
+    } catch (err) {
+        alert('摄像头访问失败: ' + err.message);
     }
 });
 
@@ -122,6 +120,15 @@ window.addEventListener('resize', () => {
         const track = stream.getVideoTracks()[0];
         const settings = track.getSettings();
         video.style.width = `${Math.min(settings.width, window.innerWidth - 40)}px`;
+    }
+});
+
+// 添加屏幕方向监听
+window.addEventListener('orientationchange', () => {
+    if (stream) {
+        const track = stream.getVideoTracks()[0];
+        const settings = track.getSettings();
+        video.style.width = `${Math.min(settings.width, window.innerWidth)}px`;
     }
 });
 
@@ -182,40 +189,30 @@ document.querySelectorAll('.presets button').forEach(btn => {
         const filter = btn.dataset.filter;
         currentFilter = filter;
         
-        // 定义滤镜参数配置
         const filterConfigs = {
-            original: [100, 0, 100, 0],
-            pink: [150, -20, 110, 80],
-            cold: [80, 10, 130, 70],
-            orange: [180, 30, 120, 60],
-            vintage: [70, 40, 90, 30]
+            original: [100, 0, 100, 20],    // 素颜
+            pink:     [140, -15, 110, 60],  // 粉嫩
+            cold:     [80, 10, 130, 40],    // 冷白皮
+            orange:   [160, 25, 110, 30],   // 元气橙
+            vintage:  [60, 40, 90, 10]      // 复古
         };
-
-        // 获取对应配置
+        
         const [satVal, hueVal, brightVal, beautyVal] = filterConfigs[filter];
-
-        // 按顺序设置参数并触发更新
+        
+        // 更新所有滑块和输入框
         [
-            { slider: saturation, value: satVal },
-            { slider: hue, value: hueVal },
-            { slider: brightness, value: brightVal },
-            { slider: beauty, value: beautyVal }
-        ].forEach(({ slider, value }) => {
-            // 1. 更新滑块值
+            [saturation, satVal],
+            [hue, hueVal],
+            [brightness, brightVal],
+            [beauty, beautyVal]
+        ].forEach(([slider, value]) => {
             slider.value = value;
-            
-            // 2. 找到对应的输入框并更新
             const input = slider.closest('.slider-item').querySelector('.value-input');
             input.value = value;
-            
-            // 3. 立即触发input事件
-            const event = new Event('input', { bubbles: true });
-            slider.dispatchEvent(event);
         });
-
-        // 立即应用滤镜（绕过防抖）
-        clearTimeout(applyFiltersTimeout);
+        
         applyFilters(true);
+        showToast(`✨ 已应用 ${btn.textContent.trim()} 滤镜`);
     });
 });
 
@@ -269,88 +266,63 @@ beautyTooltip.textContent = "美颜级别：0-30自然妆效，50-80网红美颜
 beautyTooltip.style = "position:fixed; bottom:20px; color:#666; font-size:12px;";
 document.body.appendChild(beautyTooltip);
 
-// 拍照功能
+// 修改拍照功能
 captureBtn.addEventListener('click', () => {
     const canvas = document.createElement('canvas');
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0);
+    const ctx = canvas.getContext('2d');
+    ctx.filter = video.style.filter;
+    ctx.drawImage(video, 0, 0);
     
-    const img = document.createElement('img');
-    img.src = canvas.toDataURL('image/png');
-    img.className = 'photo-item';
-    
-    // 添加下载链接
+    // 直接保存不显示在页面
     const link = document.createElement('a');
-    link.href = img.src;
-    link.download = `自拍_${new Date().toLocaleString().replace(/:/g,'-')}.png`;
-    link.appendChild(img);
+    link.href = canvas.toDataURL('image/png');
+    link.download = `selfie_${new Date().toISOString().slice(0,19).replace(/T/g,'_').replace(/-/g,'')}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     
-    gallery.prepend(link);
-    
-    // 添加删除功能
-    img.oncontextmenu = (e) => {
-        e.preventDefault();
-        link.remove();
-    };
+    showToast('📸 照片已保存');
 });
 
-// 录像功能
+// 修改录制按钮逻辑
+let recordingSeconds = 0;
+let timerHandle = null;
+
 recordBtn.addEventListener('click', () => {
     if (!recording) {
-        recordedChunks = [];
-        mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.ondataavailable = e => recordedChunks.push(e.data);
-        mediaRecorder.onstop = exportVideo;
-        
-        mediaRecorder.start();
-        startTime = Date.now();
-        updateTimer();
-        recordBtn.textContent = '⏹ 停止录制';
-        recordBtn.style.background = '#9E9E9E';
-        timer.style.display = 'inline';
-        recording = true;
+        // 开始录制
+        startRecording();
+        recordBtn.innerHTML = `⏹ 0秒`;
+        recordingSeconds = 0;
+        timerHandle = setInterval(() => {
+            recordingSeconds++;
+            recordBtn.innerHTML = `⏹ ${recordingSeconds}秒`;
+        }, 1000);
     } else {
-        mediaRecorder.stop();
-        recordBtn.textContent = '⏺ 开始录制';
-        recordBtn.style.background = '#f44336';
-        timer.style.display = 'none';
-        recording = false;
+        // 结束录制
+        clearInterval(timerHandle);
+        stopRecording();
+        recordBtn.innerHTML = '⏺ 录制';
     }
 });
 
-// 更新计时器
-function updateTimer() {
-    if (!recording) return;
-    const elapsed = Math.floor((Date.now() - startTime)/1000);
-    const minutes = String(Math.floor(elapsed/60)).padStart(2,'0');
-    const seconds = String(elapsed%60).padStart(2,'0');
-    timer.textContent = `⏱ ${minutes}:${seconds}`;
-    requestAnimationFrame(updateTimer);
-}
-
-// 导出视频
-function exportVideo() {
-    const blob = new Blob(recordedChunks, {type: 'video/webm'});
+// 修改保存录制逻辑
+function saveRecording() {
+    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+    const filename = `recording_${new Date().toISOString().slice(0,19).replace(/T/g,'_').replace(/-/g,'')}_${recordingSeconds}s.webm`;
+    
+    // 创建虚拟点击下载
     const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
     
-    const videoElement = document.createElement('video');
-    videoElement.controls = true;
-    videoElement.src = url;
-    videoElement.className = 'photo-item';
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `录像_${new Date().toLocaleString().replace(/:/g,'-')}.webm`;
-    link.textContent = '下载视频';
-    
-    const container = document.createElement('div');
-    container.style.display = 'flex';
-    container.style.flexDirection = 'column';
-    container.appendChild(videoElement);
-    container.appendChild(link);
-    
-    gallery.prepend(container);
+    showToast(`✅ 已保存 ${recordingSeconds}秒录制`);
 }
 
 // 自动模式按钮
@@ -533,4 +505,31 @@ document.querySelector(`.color-presets button[data-color="${colorPicker.value}"]
     ?.classList.add('active');
 
 // 初始化时设置默认颜色
-setBackgroundColor(colorPicker.value); 
+setBackgroundColor(colorPicker.value);
+
+// 录制功能
+function startRecording() {
+    recordedChunks = [];
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = e => recordedChunks.push(e.data);
+    mediaRecorder.onstop = saveRecording;
+    mediaRecorder.start();
+    recording = true;
+    startTime = Date.now();
+    showToast('⏺ 开始录制');
+}
+
+function stopRecording() {
+    mediaRecorder.stop();
+    recording = false;
+    clearInterval(timerHandle);
+    showToast('⏹ 录制已保存');
+}
+
+let timerInterval;
+function updateTimer() {
+    timerInterval = setInterval(() => {
+        const seconds = Math.floor((Date.now() - startTime) / 1000);
+        timer.textContent = `⏱ ${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+    }, 1000);
+} 

@@ -16,17 +16,10 @@
     <main class="main-content">
         <!-- 视频区域 -->
         <div class="video-container">
-            <video id="video" playsinline autoplay></video>
+            <video id="video" width="640" height="480" autoplay></video>
             <div class="primary-controls">
-                <button 
-                    id="toggleCamera"
-                    aria-label="切换摄像头"
-                    aria-live="polite"
-                >
-                    📷 开启摄像头
-                </button>
                 <button id="capture">📸 拍照</button>
-                <button id="record">⏺ 开始录制</button>
+                <button id="record">⏺ 录制</button>
             </div>
         </div>
 
@@ -86,7 +79,7 @@
             <section class="setting-group">
                 <h3 class="group-title">💄 推荐滤镜</h3>
                 <div class="presets">
-                    <button data-filter="original">🌿 原始</button>
+                    <button data-filter="original">🍃 素颜</button>
                     <button data-filter="pink">🌸 粉嫩</button>
                     <button data-filter="cold">❄️ 冷白皮</button>
                     <button data-filter="orange">🍊 元气橙</button>
